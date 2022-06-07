@@ -36,7 +36,7 @@ loop do
 
   apr = apr.to_f
   mo_interest_rate = (apr / 12) * 0.01
-  mo_interest_rate = mo_interest_rate.to_s.slice!(0..6).to_f
+  # mo_interest_rate = mo_interest_rate.to_s.slice!(0..6).to_f
 
   loan_duration_years = String.new
   loop do
@@ -51,11 +51,11 @@ loop do
 
   monthly_payment = loan_amount.to_f * (mo_interest_rate / (1 - (1 + mo_interest_rate)**(-loan_duration_months)))
 
-  monthly_payment = monthly_payment.to_s.slice!(0..6).to_f
+  # monthly_payment = monthly_payment.to_s.slice!(0..6).to_f
 
   Kernel.puts("Monthly Interest Rate: #{mo_interest_rate}")
   Kernel.puts("Loan Duration (in Months): #{loan_duration_months}")
-  Kernel.puts("Monthly Payment: #{monthly_payment}")
+  Kernel.puts("Monthly Payment: $#{format('%.2f', monthly_payment)}")
 
   prompt(MESSAGES['again'])
   response = Kernel.gets().chomp().downcase()

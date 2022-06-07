@@ -2,7 +2,7 @@
 
 require 'yaml'
 MESSAGES = YAML.load_file("mortgage_car_loan_calculator_messages.yml")
-Kernel.puts(MESSAGES.inspect())
+#Kernel.puts(MESSAGES.inspect())
 
 def valid_number?(num)
   num == num.to_f().to_s() || num == num.to_i().to_s()
@@ -13,6 +13,7 @@ def prompt(message)
 end
 
 loop do
+  Kernel.puts(" ")
   prompt(MESSAGES['welcome'])
 
   prompt(MESSAGES['loan_amount'])
@@ -53,9 +54,11 @@ loop do
 
   # monthly_payment = monthly_payment.to_s.slice!(0..6).to_f
 
-  Kernel.puts("Monthly Interest Rate: #{mo_interest_rate}")
+  Kernel.puts("Monthly Interest Rate: #{format('%.5f', mo_interest_rate)}")
   Kernel.puts("Loan Duration (in Months): #{loan_duration_months}")
   Kernel.puts("Monthly Payment: $#{format('%.2f', monthly_payment)}")
+  Kernel.puts("------------------------------")
+  Kernel.puts(" ")
 
   prompt(MESSAGES['again'])
   response = Kernel.gets().chomp().downcase()

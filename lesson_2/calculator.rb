@@ -53,7 +53,8 @@ loop do # Main Loop
   end
 
   # .inspect method will allow you to inspect a variable
-  # Kernel.puts(number1.inspect())
+  # Kernel.puts(first_number.inspect())
+  
   number2 = nil
   loop do
     prompt(messages('second_number'))

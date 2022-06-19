@@ -1,31 +1,43 @@
+# Calculator with Bonus Features
+# version 2
+
+require 'yaml'
+MESSAGES = YAML.load_file('calculator_messages.yml')
+# puts MESSAGES.inspect
+
+def messages(message, lang='en')
+  MESSAGES[lang][message]
+end
+
 def prompt(message)
   Kernel.puts("=> #{message}")
 end
 
 def valid_number?(num)
-  num.to_i() != 0
+  num == num.to_i().to_s() || num == num.to_f.to_s
 end
 
 def operation_to_message(operator)
   case operator
   when '1'
-    return "Adding"
+    "Adding"
   when '2'
-    return "Subtracting"
+    "Subtracting"
   when '3'
-    return "Multiplying"
+    "Multiplying"
   when '4'
-    return "Dividing"
+    "Dividing"
   end
 end
-prompt("Welcome to Calculator! Enter your name:")
+
+prompt(messages('welcome'))
 
 name = nil
 loop do
   name = Kernel.gets().chomp()
   break unless name.empty?()
 
-  prompt("Make sure to use a valid name.")
+  prompt(messages('valid_name'))
 end
 
 prompt("Hi #{name}!")
@@ -33,22 +45,22 @@ prompt("Hi #{name}!")
 loop do # Main Loop
   number1 = nil
   loop do
-    prompt("What's the first number?")
+    prompt(messages('first_number'))
     number1 = Kernel.gets().chomp()
     break if valid_number?(number1)
 
-    prompt("Invalid number, please try again.")
+    prompt(messages('valid_number'))
   end
 
-  # Kernel.puts(number1.inspect())    => .inspect will allow you to inspect a variable
+# Kernel.puts(number1.inspect()) => .inspect will allow you to inspect a variable
 
   number2 = nil
   loop do
-    prompt("What's the second number?")
+    prompt(messages('second_number'))
     number2 = Kernel.gets().chomp()
     break if valid_number?(number2)
 
-    prompt("Invalid number, please try again.")
+    prompt(messages('valid_number'))
   end
 
   operator = nil
@@ -66,7 +78,7 @@ loop do # Main Loop
     operator = Kernel.gets().chomp()
     break if %w(1 2 3 4).include?(operator)
 
-    prompt("Invalid selection, please choose 1, 2, 3, or 4.")
+    prompt(messages('valid_operator'))
   end
 
   prompt("#{operation_to_message(operator)} the two numbers...")
@@ -79,16 +91,18 @@ loop do # Main Loop
            when '3'
              number1.to_i() * number2.to_i()
            when '4'
-             number1.to_f() / number2.to_f()
-
+             number1.to_f() / number2.to_i()
            end
 
   prompt("The result is #{result}.")
+  puts "---------------------------------"
+  puts ""
 
-  prompt("Do you want to perform another calculation? (Y to calculate again)")
+  prompt(messages('another_calculation'))
   answer = Kernel.gets().chomp()
   break unless answer.downcase().start_with?("y")
-
+  puts ""
 end
 
-prompt("Thank you for using the calculator. Goodbye!")
+prompt(messages('thanks_end'))
+puts ""

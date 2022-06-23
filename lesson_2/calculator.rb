@@ -3,18 +3,44 @@
 
 require 'yaml'
 MESSAGES = YAML.load_file('calculator_messages.yml')
-# puts MESSAGES.inspect
 
 def messages(message, lang='en')
   MESSAGES[lang][message]
 end
 
 def prompt(message)
-  Kernel.puts("=> #{message}")
+  puts("=> #{message}")
+end
+
+def get_name
+  name = gets.chomp
+  if name.empty? == false
+    name
+  else
+    prompt(messages('valid_name'))
+  end
+end
+
+def get_number
+  num = gets.chomp
+  if valid_number?(num)
+    num
+  else
+    prompt(messages('invalid_number'))
+  end
 end
 
 def valid_number?(num)
-  num == num.to_i().to_s() || num == num.to_f.to_s
+  num == num.to_i.to_s || num == num.to_f.to_s
+end
+
+def get_operator
+  operator = gets.chomp
+  if %w(1 2 3 4).include?(operator)
+    operator
+  else
+    prompt(messages('invalid_operator'))
+  end
 end
 
 def operation_to_message(operator)
@@ -30,40 +56,35 @@ def operation_to_message(operator)
   end
 end
 
+system 'clear'
 prompt(messages('welcome'))
 
 name = nil
 loop do
-  name = Kernel.gets().chomp()
-  break unless name.empty?()
-
-  prompt(messages('valid_name'))
+  name = get_name
+  break if name
 end
 
+puts ""
 prompt("Hi #{name}!")
 
 loop do # Main Loop
   number1 = nil
   loop do
     prompt(messages('first_number'))
-    number1 = Kernel.gets().chomp()
-    break if valid_number?(number1)
-
-    prompt(messages('valid_number'))
+    number1 = get_number
+    break if number1
   end
 
-  # .inspect method will allow you to inspect a variable
-  # Kernel.puts(first_number.inspect())
-
+  puts ""
   number2 = nil
   loop do
     prompt(messages('second_number'))
-    number2 = Kernel.gets().chomp()
-    break if valid_number?(number2)
-
-    prompt(messages('valid_number'))
+    number2 = get_number
+    break if number2
   end
 
+  puts ""
   operator = nil
   operator_prompt = <<~MSG
     What operation would you like to perform?
@@ -76,33 +97,34 @@ loop do # Main Loop
   prompt(operator_prompt)
 
   loop do
-    operator = Kernel.gets().chomp()
-    break if %w(1 2 3 4).include?(operator)
-
-    prompt(messages('valid_operator'))
+    operator = get_operator
+    break if operator
   end
 
+  puts ""
+  puts "---------------------------------"
   prompt("#{operation_to_message(operator)} the two numbers...")
 
   result = case operator
            when '1'
-             number1.to_i() + number2.to_i()
+             number1.to_f + number2.to_f
            when '2'
-             number1.to_i() - number2.to_i()
+             number1.to_f - number2.to_f
            when '3'
-             number1.to_i() * number2.to_i()
+             number1.to_f * number2.to_f
            when '4'
-             number1.to_f() / number2.to_i()
+             number1.to_f / number2.to_f
            end
 
-  prompt("The result is #{result}.")
+  prompt("The result is #{result}")
   puts "---------------------------------"
   puts ""
 
   prompt(messages('another_calculation'))
-  answer = Kernel.gets().chomp()
-  break unless answer.downcase().start_with?("y")
-  puts ""
+  answer = gets.chomp
+  break unless answer.downcase == 'y' || answer.downcase == 'yes'
+
+  system 'clear'
 end
 
 prompt(messages('thanks_end'))

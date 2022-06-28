@@ -7,6 +7,7 @@ en:
   invalid_number: "Invalid number, please try again."
   invalid_operator: "Invalid selection, please choose 1, 2, 3, or 4."
   another_calculation: "Do you want to perform another calculation? (Y/YES to calculate again)"
+  invalid_new_calc_response: "Invalid response, please try again."
   thanks_end: "Thank you for using the calculator. Goodbye!"
 
 es:

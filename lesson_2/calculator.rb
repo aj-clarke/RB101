@@ -1,5 +1,5 @@
 # Calculator with Bonus Features
-# version 2
+# version 3
 
 require 'yaml'
 MESSAGES = YAML.load_file('calculator_messages.yml')
@@ -27,6 +27,7 @@ def get_number
     num
   else
     prompt(messages('invalid_number'))
+    puts ''
   end
 end
 
@@ -39,6 +40,7 @@ def get_operator
   if %w(1 2 3 4).include?(operator)
     operator
   else
+    puts ''
     prompt(messages('invalid_operator'))
   end
 end
@@ -56,6 +58,19 @@ def operation_to_message(operator)
   end
 end
 
+def another_calculation
+  loop do
+    prompt(messages('another_calculation'))
+    response = gets.chomp.downcase
+    if response == 'y' || response == 'n'
+      return response
+    else
+      prompt(messages('invalid_new_calc_response'))
+      puts ''
+    end
+  end
+end
+
 system 'clear'
 prompt(messages('welcome'))
 
@@ -65,7 +80,7 @@ loop do
   break if name
 end
 
-puts ""
+puts ''
 prompt("Hi #{name}!")
 
 loop do # Main Loop
@@ -76,7 +91,7 @@ loop do # Main Loop
     break if number1
   end
 
-  puts ""
+  puts ''
   number2 = nil
   loop do
     prompt(messages('second_number'))
@@ -84,7 +99,7 @@ loop do # Main Loop
     break if number2
   end
 
-  puts ""
+  puts ''
   operator = nil
   operator_prompt = <<~MSG
     What operation would you like to perform?
@@ -92,6 +107,7 @@ loop do # Main Loop
     2) subtract
     3) multiply
     4) divide
+    -----------
   MSG
 
   prompt(operator_prompt)
@@ -101,8 +117,8 @@ loop do # Main Loop
     break if operator
   end
 
-  puts ""
-  puts "---------------------------------"
+  puts ''
+  puts '---------------------------------'
   prompt("#{operation_to_message(operator)} the two numbers...")
 
   result = case operator
@@ -117,15 +133,14 @@ loop do # Main Loop
            end
 
   prompt("The result is #{result}")
-  puts "---------------------------------"
-  puts ""
+  puts '---------------------------------'
+  puts ''
 
-  prompt(messages('another_calculation'))
-  answer = gets.chomp
-  break unless answer.downcase == 'y' || answer.downcase == 'yes'
-
+  new_calculation = another_calculation
+  break if new_calculation == 'n'
   system 'clear'
 end
 
+puts ''
 prompt(messages('thanks_end'))
-puts ""
+puts ''

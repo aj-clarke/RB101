@@ -57,7 +57,6 @@ ALTERNATE METHOD?
 **PSEUDO - Informal**
 - Create a method 'sum_of_digits' with one parameter 'int' to ingest integer
 - Set int_str_arr to integer converted to string, with split('') chained
-- IF int_str_arr includes '_' or ',', gsub! to remove it
 - MAP result of int_str_arr elements converted to integer to int_arr
 - Return sum of int_arr
 

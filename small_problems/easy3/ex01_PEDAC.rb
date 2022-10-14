@@ -67,62 +67,89 @@ Algorithm:
 
 **PSEUDO - Informal**
 - Create a variable `comparison_array` set to an empty array
-- Get input for each of the first 5 numbers (convert to integer)
-  - Set the variable `number` as the input number then add it to the empty array
-  - Repeat
+- Create an input order array for 1st through 5th count (quick create with %w)
+- Create counter for input loop
+- Begin integer input loop
+  - Get input for each of the first 5 numbers (convert to integer)
+    - Set the variable `number` as the input number then add it to the empty
+      array
+    - Increase counter
+    - Break out of loop when counter equals 5
 - Get input for the last number
   - Set a variable `comparison_integer` equal to the number (convert to integer)
-- Create empty variable `contains_number`
-  - Use EACH against array
+- Check array to see if it INCLUDES the `comparison_integer`
   - If the `comparison_integer` matches one of the iterations integers
-    - Set `contains_number` to true
+    - Display - The `comparison_integer` appears in the array
   - If the `comparison_integer` does not match one of the iterations integers
-  - Set `contains_number` to true
-- Display - The `comparison_integer` appears in the array
-- Display - The `comparison_integer` does not appear in the array
+    - Display - The `comparison_integer` does not appear in the array
 
 **PSEUDO - Formal**
 START
 SET comparison_array = []
+SET input_order = %w(1st 2nd 3rd 4th 5th)
+SET count = 1
 
-DISPLAY '==> Enter the 1st number:'
-SET number = gets.chomp.to_i
-SET comparison_array << number
+LOOP
+  DISPLAY "==> Enter the #{input_order[counter]} number:"
+  SET number = gets.chomp.to_i
+  SET comparison_array << number
+  SET count += 1
+  BREAK IF count.eql?(4)
+END LOOP
 
-DISPLAY '==> Enter the 2nd number:'
-SET number = gets.chomp.to_i
-SET comparison_array << number
+*REFACTORED OUT*
+----------------------------------------
+    DISPLAY '==> Enter the 1st number:'
+    SET number = gets.chomp.to_i
+    SET comparison_array << number
 
-DISPLAY '==> Enter the 3rd number:'
-SET number = gets.chomp.to_i
-SET comparison_array << number
+    DISPLAY '==> Enter the 2nd number:'
+    SET number = gets.chomp.to_i
+    SET comparison_array << number
 
-DISPLAY '==> Enter the 4th number:'
-SET number = gets.chomp.to_i
-SET comparison_array << number
+    DISPLAY '==> Enter the 3rd number:'
+    SET number = gets.chomp.to_i
+    SET comparison_array << number
 
-DISPLAY '==> Enter the 5th number:'
-SET number = gets.chomp.to_i
-SET comparison_array << number
+    DISPLAY '==> Enter the 4th number:'
+    SET number = gets.chomp.to_i
+    SET comparison_array << number
+
+    DISPLAY '==> Enter the 5th number:'
+    SET number = gets.chomp.to_i
+    SET comparison_array << number
+----------------------------------------
+*END REFACTORED OUT*
 
 DISPLAY '==> Enter the final number:'
 SET comparison_integer = gets.chomp.to_i
 
-SET contains_number = ''
-EACH integer in comparison_array
-  IF integer.eql?(comparison_integer)
-    SET (contains_number = true)
-    BREAK
-  ELSE
-    SET (contains_number = false)
-  END IF
-END
-DISPLAY "The integer `comparison_integer` appears in `comparison_array`"
-  IF contains_number == true
-DISPLAY "The integer `comparison_integer` does not appear in `comparison_array`"
-  IF contains_number == false
-END
+*REFACTORED OUT*
+----------------------------------------
+    SET contains_number = ''
+    EACH integer in comparison_array
+      IF integer.eql?(comparison_integer)
+        SET (contains_number = true)
+        BREAK
+      ELSE
+        SET (contains_number = false)
+      END IF
+    END
+    DISPLAY "The integer `comparison_integer` appears in `comparison_array`"
+      IF contains_number == true
+    DISPLAY "The integer `comparison_integer` does not appear in
+      `comparison_array`"
+      IF contains_number == false
+    END
+----------------------------------------
+*END REFACTORED OUT*
 
+IF `comparison_array.include?(comparison_integer)
+  DISPLAY "The integer `comparison_integer` appears in `comparison_array`"
+ELSE
+  DISPLAY "The integer `comparison_integer` does not appear in
+  `comparison_array`"
+END
 ----------------------
 
 Code

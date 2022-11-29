@@ -10,3 +10,4 @@
 - [easy1](https://github.com/aj-clarke/RB101/tree/main/small_problems/easy1)
 - [easy2](https://github.com/aj-clarke/RB101/tree/main/small_problems/easy2)
 - [easy3](https://github.com/aj-clarke/RB101/tree/main/small_problems/easy3)
+- [easy4](https://github.com/aj-clarke/RB101/tree/main/small_problems/easy4)

@@ -1,0 +1,10 @@
+
+welcome: Welcome to the game of Tic-Tac-Toe!
+who_goes_first_intro: Who goes first? Enter 'Player', 'Computer', or 'Random' to let the computer choose.
+who_goes_first_invalid: Invalid entry, please try again. Enter 'Player', 'Computer', or 'Random'.
+invalid_response: Invalid entry, please try again.
+press_enter_nxt_round: Press enter to continue to the next round...
+press_enter_tie: It's a tie! Press enter to continue to the next round...
+press_enter_game_end: Press enter to continue...
+run_it_back_play_again: Would you like to play again? ('Y' or 'N')
+thanks: Thanks for playing Tic-Tac-Toe!

@@ -99,8 +99,8 @@ def computer_places_piece!(brd, score)
   square = computer_off_or_def(brd)
   if brd[5].eql?(INITIAL_MARKER) && square.eql?(nil)
     square = 5
-  else
-    square = empty_squares(brd).sample if square.nil?
+  elsif square.nil?
+    square = empty_squares(brd).sample
   end
   brd[square] = COMPUTER_MARKER
 end

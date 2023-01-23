@@ -1,6 +1,5 @@
 require 'pry'
 require 'yaml'
-
 MESSAGES = YAML.load_file('tic_tac_toe_messages.yml')
 
 WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] + # rows
@@ -57,6 +56,7 @@ end
 def joinor(brd, sep_char = ', ', add_or = 'or')
   brd_str = empty_squares(brd).map(&:to_s)
   int = brd_str.pop
+  return int if brd_str.empty?
   brd_str << "#{add_or} #{int}"
   brd_str.join(sep_char)
 end
@@ -86,17 +86,18 @@ def player_places_piece!(brd)
   square = ''
   loop do
     prompt("Choose a square (#{joinor(brd, ', ', 'or')}):")
-    square = gets.chomp.to_i
-    break if empty_squares(brd).include?(square)
+    square = gets.chomp
+    break if ('1'..'9').to_a.any? { |num| num.eql?(square) }
 
     prompt(MESSAGES['invalid_response'])
   end
-  brd[square] = PLAYER_MARKER
+  brd[square.to_i] = PLAYER_MARKER
 end
 
 def computer_places_piece!(brd, score)
   display_board(brd, score)
-  square = computer_off_or_def(brd)
+  option = { offense: nil, defense: nil }
+  square = computer_off_or_def(brd, option)
   if brd[5].eql?(INITIAL_MARKER) && square.eql?(nil)
     square = 5
   elsif square.nil?
@@ -105,23 +106,36 @@ def computer_places_piece!(brd, score)
   brd[square] = COMPUTER_MARKER
 end
 
-# rubocop:disable Metrics/AbcSize, Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
-def computer_off_or_def(brd)
-  option = { offense: nil, defense: nil }
+def computer_off_or_def(brd, option)
   WINNING_LINES.each do |line|
-    if brd.values_at(*line).count(COMPUTER_MARKER) == 2 &&
-       line.any? { |num| brd[num].include?(INITIAL_MARKER) == true }
-      option[:offense] = line.select { |box| brd[box].eql?(INITIAL_MARKER) }.pop
-    elsif brd.values_at(*line).count(PLAYER_MARKER) == 2 &&
-          line.any? { |num| brd[num].include?(INITIAL_MARKER) == true }
-      option[:defense] = line.select { |box| brd[box].eql?(INITIAL_MARKER) }.pop
+    if computer_offense_chosen(brd, line)
+      option[:offense] = computer_off_or_def_square(brd, line)
+    elsif computer_defense_chosen(brd, line)
+      option[:defense] = computer_off_or_def_square(brd, line)
     end
   end
   return option[:offense] unless option[:offense].eql?(nil)
   return option[:defense] unless option[:defense].eql?(nil)
   nil
 end
-# rubocop:enable Metrics/AbcSize, Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
+
+def computer_offense_chosen(brd, line)
+  if brd.values_at(*line).count(COMPUTER_MARKER) == 2 &&
+     line.any? { |num| brd[num].include?(INITIAL_MARKER) == true }
+    true
+  end
+end
+
+def computer_defense_chosen(brd, line)
+  if brd.values_at(*line).count(PLAYER_MARKER) == 2 &&
+     line.any? { |num| brd[num].include?(INITIAL_MARKER) == true }
+    true
+  end
+end
+
+def computer_off_or_def_square(brd, line)
+  line.select { |box| brd[box].eql?(INITIAL_MARKER) }.pop
+end
 
 def board_full?(brd)
   empty_squares(brd).empty?
@@ -142,6 +156,7 @@ end
 def display_results(brd, score)
   detect_winner(brd) == 'Player' ? score[:player] += 1 : score[:computer] += 1
   display_board(brd, score)
+
   if score[:player].eql?(2) || score[:computer].eql?(2)
     prompt("#{detect_winner(brd)} won the game!")
     prompt(MESSAGES['press_enter_game_end'])
@@ -171,11 +186,11 @@ system 'clear'
 prompt(MESSAGES['welcome'])
 loop do
   score = { player: 0, computer: 0 }
-
   loop do
     loop do
       board = initialize_board
       current_player = who_goes_first
+
       loop do
         display_board(board, score)
         place_piece!(board, score, current_player)
@@ -189,8 +204,8 @@ loop do
         display_board(board, score)
         prompt(MESSAGES['press_enter_tie'])
       end
-
       gets.chomp
+
       break if someone_won?(board)
     end
 

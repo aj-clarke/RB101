@@ -1,3 +1,4 @@
+require 'pry'
 require 'yaml'
 MESSAGES = YAML.load_file('tic_tac_toe_messages.yml')
 
@@ -55,6 +56,7 @@ end
 def joinor(brd, sep_char = ', ', add_or = 'or')
   brd_str = empty_squares(brd).map(&:to_s)
   int = brd_str.pop
+  return int if brd_str.empty?
   brd_str << "#{add_or} #{int}"
   brd_str.join(sep_char)
 end
@@ -84,17 +86,18 @@ def player_places_piece!(brd)
   square = ''
   loop do
     prompt("Choose a square (#{joinor(brd, ', ', 'or')}):")
-    square = gets.chomp.to_i
-    break if empty_squares(brd).include?(square)
+    square = gets.chomp
+    break if ('1'..'9').to_a.any? { |num| num.eql?(square) }
 
     prompt(MESSAGES['invalid_response'])
   end
-  brd[square] = PLAYER_MARKER
+  brd[square.to_i] = PLAYER_MARKER
 end
 
 def computer_places_piece!(brd, score)
   display_board(brd, score)
-  square = computer_off_or_def(brd)
+  option = { offense: nil, defense: nil }
+  square = computer_off_or_def(brd, option)
   if brd[5].eql?(INITIAL_MARKER) && square.eql?(nil)
     square = 5
   elsif square.nil?
@@ -103,23 +106,36 @@ def computer_places_piece!(brd, score)
   brd[square] = COMPUTER_MARKER
 end
 
-# rubocop:disable Metrics/AbcSize, Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
-def computer_off_or_def(brd)
-  option = { offense: nil, defense: nil }
+def computer_off_or_def(brd, option)
   WINNING_LINES.each do |line|
-    if brd.values_at(*line).count(COMPUTER_MARKER) == 2 &&
-       line.any? { |num| brd[num].include?(INITIAL_MARKER) == true }
-      option[:offense] = line.select { |box| brd[box].eql?(INITIAL_MARKER) }.pop
-    elsif brd.values_at(*line).count(PLAYER_MARKER) == 2 &&
-          line.any? { |num| brd[num].include?(INITIAL_MARKER) == true }
-      option[:defense] = line.select { |box| brd[box].eql?(INITIAL_MARKER) }.pop
+    if computer_offense_chosen(brd, line)
+      option[:offense] = computer_off_or_def_square(brd, line)
+    elsif computer_defense_chosen(brd, line)
+      option[:defense] = computer_off_or_def_square(brd, line)
     end
   end
   return option[:offense] unless option[:offense].eql?(nil)
   return option[:defense] unless option[:defense].eql?(nil)
   nil
 end
-# rubocop:enable Metrics/AbcSize, Metrics/PerceivedComplexity, Metrics/CyclomaticComplexity
+
+def computer_offense_chosen(brd, line)
+  if brd.values_at(*line).count(COMPUTER_MARKER) == 2 &&
+     line.any? { |num| brd[num].include?(INITIAL_MARKER) == true }
+    true
+  end
+end
+
+def computer_defense_chosen(brd, line)
+  if brd.values_at(*line).count(PLAYER_MARKER) == 2 &&
+     line.any? { |num| brd[num].include?(INITIAL_MARKER) == true }
+    true
+  end
+end
+
+def computer_off_or_def_square(brd, line)
+  line.select { |box| brd[box].eql?(INITIAL_MARKER) }.pop
+end
 
 def board_full?(brd)
   empty_squares(brd).empty?
@@ -150,10 +166,10 @@ def display_results(brd, score)
   end
 end
 
-def run_it_back?
+def play_again?
   another_game = ''
   loop do
-    prompt(MESSAGES['run_it_back_play_again'])
+    prompt(MESSAGES['play_again?'])
     response = gets.chomp.downcase
     another_game = false if response.eql?('n') || response.eql?('no')
     another_game = true if response.eql?('y') || response.eql?('yes')
@@ -196,7 +212,7 @@ loop do
     break if score[:player].eql?(2) || score[:computer].eql?(2)
   end
 
-  break unless run_it_back?
+  break unless play_again?
 end
 
 prompt(MESSAGES['thanks'])

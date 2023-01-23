@@ -121,16 +121,20 @@ end
 
 def computer_offense_chosen(brd, line)
   if brd.values_at(*line).count(COMPUTER_MARKER) == 2 &&
-     line.any? { |num| brd[num].include?(INITIAL_MARKER) == true }
+     computer_find_empty_square(brd, line)
     true
   end
 end
 
 def computer_defense_chosen(brd, line)
   if brd.values_at(*line).count(PLAYER_MARKER) == 2 &&
-     line.any? { |num| brd[num].include?(INITIAL_MARKER) == true }
+     computer_find_empty_square(brd, line)
     true
   end
+end
+
+def computer_find_empty_square(brd, line)
+  line.any? { |num| brd[num].include?(INITIAL_MARKER) == true }
 end
 
 def computer_off_or_def_square(brd, line)

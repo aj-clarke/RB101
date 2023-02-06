@@ -2,6 +2,11 @@ require 'pry'
 require 'yaml'
 MESSAGES = YAML.load_file('twenty_one_messages.yml')
 
+D_STAY = 17 # Update BASICRULES and YAML messages as needed
+MAX_HAND = 21 # Update BASICRULES and YAML messages as needed
+
+GAME_ROUNDS = 2
+
 def prompt(msg)
   puts "=> #{msg}"
 end
@@ -20,22 +25,23 @@ def basic_rules
 | - The Dealer will always 'hit' until the hand total is at least 17. After 17 |
 |   or higher is reached, the dealers turn is over, and hand totals determine  |
 |   a win or a tie.                                                            |
+| - The first to win 5 games total is the CHAMPION. Good Luck!!                |
  ------------------------------------------------------------------------------
   BASICRULES
 end
 
 def full_deck
   {
-    'H' => { '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, 
+    'H' => { '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7,
              '8' => 8, '9' => 9, '10' => 10, 'J' => 10, 'Q' => 10, 'K' => 10,
              'A' => 11 },
-    'D' => { '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, 
+    'D' => { '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7,
              '8' => 8, '9' => 9, '10' => 10, 'J' => 10, 'Q' => 10, 'K' => 10,
              'A' => 11 },
-    'C' => { '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, 
+    'C' => { '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7,
              '8' => 8, '9' => 9, '10' => 10, 'J' => 10, 'Q' => 10, 'K' => 10,
              'A' => 11 },
-    'S' => { '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7, 
+    'S' => { '2' => 2, '3' => 3, '4' => 4, '5' => 5, '6' => 6, '7' => 7,
              '8' => 8, '9' => 9, '10' => 10, 'J' => 10, 'Q' => 10, 'K' => 10,
              'A' => 11 }
   }
@@ -178,30 +184,30 @@ end
 def calculate_hand_total(hand_val_arr)
   loop do
     break if hand_val_arr.index(11).nil?
-    if hand_val_arr.sum > 21
+    if hand_val_arr.sum > MAX_HAND
       change_idx = hand_val_arr.index(11)
       hand_val_arr[change_idx] = 1
     end
-    break if hand_val_arr.sum <= 21
+    break if hand_val_arr.sum <= MAX_HAND
   end
   hand_val_arr.sum
 end
 
-def check_for_21(cards_and_values, show_dealer, twenty_one_win)
+def check_for_max_hand(cards_and_values, show_dealer, max_hand_win)
   player_total = calculate_hand_total(cards_and_values[:player_card_values])
   dealer_total = calculate_hand_total(cards_and_values[:dealer_card_values])
-  result = possible_21_results(player_total, dealer_total)
+  result = possible_max_hand_results(player_total, dealer_total)
   show_dealer.gsub!('no', 'yes') if !result.nil?
-  twenty_one_win << 'true' if !result.nil?
+  max_hand_win << 'true' if !result.nil?
   result
 end
 
-def possible_21_results(player_total, dealer_total)
-  if player_total.eql?(21) && dealer_total.eql?(21)
+def possible_max_hand_results(player_total, dealer_total)
+  if player_total.eql?(MAX_HAND) && dealer_total.eql?(MAX_HAND)
     'tie'
-  elsif player_total.eql?(21)
+  elsif player_total.eql?(MAX_HAND)
     'player'
-  elsif dealer_total.eql?(21)
+  elsif dealer_total.eql?(MAX_HAND)
     'dealer'
   end
 end
@@ -213,8 +219,8 @@ def player_hand_status(response, cards_and_values, break_out)
     break_out << 'true'
   end
 
-  if calculate_hand_total(cards_and_values[:player_card_values]).eql?(21)
-    prompt(MESSAGES['player_has_21_stay'])
+  if calculate_hand_total(cards_and_values[:player_card_values]).eql?(MAX_HAND)
+    prompt(MESSAGES['player_has_max_stay'])
     gets.chomp
     break_out << 'true'
   end
@@ -231,15 +237,15 @@ def player_hand_check(response, cards_and_values, show_dealer, break_out)
     return 'bust'
   end
 
-  if calculate_hand_total(cards_and_values[:player_card_values]).eql?(21)
+  if calculate_hand_total(cards_and_values[:player_card_values]).eql?(MAX_HAND)
     show_dealer.gsub!('no', 'yes')
     player_hand_status(response, cards_and_values, break_out)
-    '21'
+    'max_hand'
   end
 end
 
 def bust?(hand_total)
-  hand_total > 21
+  hand_total > MAX_HAND
 end
 
 def computer_hand_start(show_dealer, cards_and_values, score)
@@ -250,14 +256,14 @@ def computer_hand_start(show_dealer, cards_and_values, score)
 end
 
 def computer_hit_process(deck, cards_and_values, show_dealer, score)
-  prompt(MESSAGES['dealer_below_17'])
+  prompt(MESSAGES['dealer_below_stay'])
   gets.chomp
   deal_cards(deck, 1, cards_and_values, 'dealer')
   full_board_display(cards_and_values, show_dealer, score)
 end
 
-def computer_under_17?(dealer_cards_value)
-  dealer_cards_value.sum < 17
+def computer_under_stay?(dealer_cards_value)
+  dealer_cards_value.sum < D_STAY
 end
 
 def computer_hit_check(cards_and_values)
@@ -266,27 +272,27 @@ def computer_hit_check(cards_and_values)
   gets.chomp
 end
 
-def computer_21_check(cards_and_values, show_dealer)
-  puts "Dealer stays at 21! Press enter to continue..."
-  check_for_21(cards_and_values, show_dealer)
+def computer_max_hand_check(cards_and_values, show_dealer, max_hand_win)
+  puts "Dealer stays with the best hand possible! Press enter to continue..."
+  check_for_max_hand(cards_and_values, show_dealer, max_hand_win)
 end
 
-def winner_by_21(check_21_win, winner, msg)
-  if check_21_win.eql?('tie')
-    msg << 'You and the dealer have 21!'
-  elsif check_21_win.eql?('player')
+def winner_by_max_hand(check_max_hand_win, winner, msg)
+  if check_max_hand_win.eql?('tie')
+    msg << 'You and the dealer both have the best hands possible!'
+  elsif check_max_hand_win.eql?('player')
     winner << 'player'
-    msg << 'You got 21 and are the winner!'
+    msg << 'You got the best hand possible and are the winner!'
   else
     winner << 'dealer'
-    msg << 'The dealer has 21, you lose this round.'
+    msg << 'The dealer has the best hand possible, you lose this round.'
   end
 end
 
 def winner_by_bust(winner, msg, p_status, d_bust)
   if p_status.eql?('bust')
     winner << 'dealer'
-    msg << 'One hit too many, you went over 21 and busted!'
+    msg << 'One hit too many, you went over the max hand limit and busted!'
   elsif d_bust.eql?(true)
     winner << 'player'
     msg << 'The dealer got greedy and busted!'
@@ -306,26 +312,44 @@ def winner_by_card_total(p_sum, d_sum, winner, msg)
   end
 end
 
+def champion(score, winner)
+  winner << 'p_wins' if score[:player].eql?(GAME_ROUNDS)
+  winner << 'd_wins' if score[:dealer].eql?(GAME_ROUNDS)
+end
+
 # rubocop: disable Metrics/MethodLength
 def winner_message(winner)
-  if winner.eql?('tie')
+  case winner
+  when 'tie'
     <<-TIEMSG
 =========================================
    Well..You didn't lose! It is a TIE!
 =========================================
       TIEMSG
-  elsif winner.eql?('player')
+  when 'player'
     <<-WINMSG
 =========================================
-    $$$$ CONGRATULATIONS YOU WON $$$$
+      Nice Work! You win the round!
 =========================================
     WINMSG
-  elsif winner.eql?('dealer')
+  when 'dealer'
     <<-LOSSMSG
 =========================================
 The dealer wins, better luck next round!!
 =========================================
     LOSSMSG
+  when 'p_wins'
+    <<-PWINSMSG
+=========================================
+    $$$$ CONGRATULATIONS YOU WON $$$$
+=========================================
+    PWINSMSG
+  when 'd_wins'
+    <<-DWINSMSG
+=========================================
+  EVERYONE KNOWS THE HOUSE ALWAYS WINS!
+=========================================
+    DWINSMSG
   end
 end
 # rubocop: enable Metrics/MethodLength
@@ -349,7 +373,7 @@ def play_again_full_logic
 end
 
 def play_again
-  prompt(MESSAGES['play_another_round'])
+  prompt(MESSAGES['play_another_game'])
   response = gets.chomp.downcase
   if response.eql?('n') || response.eql?('no')
     return 'no'
@@ -360,12 +384,20 @@ def play_again
 end
 
 def play_again_yes
-  prompt(MESSAGES['next_round_starting'])
+  prompt(MESSAGES['next_game_starting'])
   gets.chomp
+end
+
+def reset_score(score)
+  score[:player] = 0
+  score[:dealer] = 0
 end
 
 # Begin Game
 score = { player: 0, dealer: 0 }
+puts basic_rules
+prompt(MESSAGES['basic_rules'])
+gets.chomp
 
 loop do
   deck = full_deck
@@ -376,9 +408,10 @@ loop do
   deal_cards(deck, 2, cards_and_values, 'dealer')
   full_board_display(cards_and_values, show_dealer, score)
 
-  twenty_one_win = String.new
-  check_21_win = check_for_21(cards_and_values, show_dealer, twenty_one_win)
-  if !check_21_win.nil?
+  max_hand_win = String.new
+  check_max_hand_win = check_for_max_hand(cards_and_values, show_dealer,
+                                          max_hand_win)
+  if !check_max_hand_win.nil?
     show_dealer.gsub!('no', 'yes')
     full_board_display(cards_and_values, show_dealer, score)
   else
@@ -408,16 +441,17 @@ loop do
 
       loop do
         full_board_display(cards_and_values, show_dealer, score)
-        if computer_under_17?(cards_and_values[:dealer_card_values])
+        if computer_under_stay?(cards_and_values[:dealer_card_values])
           computer_hit_process(deck, cards_and_values, show_dealer, score)
         end
 
         dealer_total = cards_and_values[:dealer_card_values].sum
-        if dealer_total >= 17 && dealer_total < 21
+        if dealer_total >= D_STAY && dealer_total < MAX_HAND
           computer_hit_check(cards_and_values)
           break
-        elsif dealer_total.eql?(21)
-          check_21_win = computer_21_check(cards_and_values, show_dealer)
+        elsif dealer_total.eql?(MAX_HAND)
+          check_max_hand_win = computer_max_hand_check(cards_and_values,
+                                                       show_dealer)
           break
         elsif bust?(cards_and_values[:dealer_card_values].sum)
           dealer_bust = true
@@ -434,9 +468,9 @@ loop do
   winner = String.new
 
   puts
-  if twenty_one_win.eql?('true')
-    winner_by_21(check_21_win, winner, msg)
-    win_msg = winner_message(check_21_win)
+  if max_hand_win.eql?('true')
+    winner_by_max_hand(check_max_hand_win, winner, msg)
+    win_msg = winner_message(check_max_hand_win)
   elsif player_status.eql?('bust') || dealer_bust.eql?(true)
     winner_by_bust(winner, msg, player_status, dealer_bust)
     win_msg = winner_message(winner)
@@ -450,12 +484,23 @@ loop do
 
   puts
   full_board_display(cards_and_values, show_dealer, score)
-  display_winner(msg, win_msg)
-  prompt(MESSAGES['round_over'])
+  if score[:player] < GAME_ROUNDS && score[:dealer] < GAME_ROUNDS
+    display_winner(msg, win_msg)
+    prompt(MESSAGES['round_over'])
+  else
+    winner.gsub!(/[a-z]/i, '')
+    champion(score, winner)
+    win_msg = winner_message(winner)
+    display_winner(msg, win_msg)
+    prompt(MESSAGES['game_over'])
+  end
   gets.chomp
 
-  response = play_again_full_logic
-  break if response.eql?('no')
+  if score[:player].eql?(GAME_ROUNDS) || score[:dealer].eql?(GAME_ROUNDS)
+    response = play_again_full_logic
+    break if response.eql?('no')
+    reset_score(score)
+  end
 end
 
 system 'clear'

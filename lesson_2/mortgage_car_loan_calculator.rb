@@ -20,12 +20,10 @@ def get_loan_amount
     prompt(MESSAGES['loan_amount'])
     loan_amount = gets.chomp
     strip_commas(loan_amount)
-    if valid_number?(loan_amount) && loan_amount.to_i > 0
-      return loan_amount
-    else
-      prompt(MESSAGES['invalid_number'])
-      puts ''
-    end
+    return loan_amount if valid_number?(loan_amount) && loan_amount.to_i > 0
+
+    prompt(MESSAGES['invalid_number'])
+    puts ''
   end
 end
 
@@ -40,12 +38,9 @@ def get_apr
   loop do
     prompt(MESSAGES['apr'])
     apr = gets.chomp
-    if valid_number?(apr)
-      return apr
-    else
-      prompt(MESSAGES['invalid_number'])
-      puts ''
-    end
+    return apr if valid_number?(apr)
+    prompt(MESSAGES['invalid_number'])
+    puts ''
   end
 end
 
@@ -119,11 +114,12 @@ loop do # main loop
   puts "Monthly Interest Rate: #{format('%.5f', mo_interest_rate)}"
   puts "Loan Duration (in Months): #{loan_duration_months}"
   puts "Monthly Payment: $#{format('%.2f', monthly_payment)}"
-  puts "------------------------------"
-  puts ""
+  puts '------------------------------'
+  puts ''
 
   new_calculation = another_calculation
   break if new_calculation == 'n'
+
   system 'clear'
 end
 puts ''

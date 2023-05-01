@@ -47,22 +47,16 @@ def full_deck
   }
 end
 
-=begin
-Deals specified num of cards to player or dealer hand that is passed into method
-Pushes card into passed in `hand_arr` array, pushes each cards value into the
-respective hands value array, then deletes that card from the games nested
-`deck` hash
-=end
 def deal_cards(deck, num_to_deal, cards_and_values, to_who = 'player')
   deal_to = ['player_cards', 'player_card_values'] if to_who.eql?('player')
   deal_to = ['dealer_cards', 'dealer_card_values'] if to_who.eql?('dealer')
 
   num_to_deal.times do |_|
-    deal_cards_logic(deck, cards_and_values, deal_to)
+    deal_card(deck, cards_and_values, deal_to)
   end
 end
 
-def deal_cards_logic(deck, cards_and_values, deal_to)
+def deal_card(deck, cards_and_values, deal_to)
   suit = deck.keys.sample
   card = deck[suit].keys.sample
   cards_and_values[deal_to[0].to_sym] << [suit, card]
@@ -70,12 +64,12 @@ def deal_cards_logic(deck, cards_and_values, deal_to)
   deck[suit].delete(card)
 end
 
-def full_board_display(cards_and_values, show_dealer, score)
+def board_display(cards_and_values, show_dealer, score)
   puts basic_rules
-  board_display(cards_and_values, show_dealer, score)
+  board_layout(cards_and_values, show_dealer, score)
 end
 
-def board_display(cards_and_values, show_dealer, score)
+def board_layout(cards_and_values, show_dealer, score)
   puts hand_display_separator(cards_and_values[:player_cards],
                               cards_and_values[:dealer_cards])
   hand_display(cards_and_values, show_dealer)
@@ -213,7 +207,7 @@ def possible_max_hand_results(player_total, dealer_total)
 end
 
 def player_hand_status(response, cards_and_values, break_out)
-  if response.eql?('stay')
+  if ['stay', 's'].include?(response)
     prompt(MESSAGES['player_chose_stay'])
     gets.chomp
     break_out << 'true'
@@ -227,7 +221,7 @@ def player_hand_status(response, cards_and_values, break_out)
 end
 
 def player_hand_check(response, cards_and_values, show_dealer, break_out)
-  if response.eql?('stay')
+  if ['stay', 's'].include?(response)
     player_hand_status(response, cards_and_values, break_out)
     return 'stay'
   end
@@ -250,7 +244,7 @@ end
 
 def computer_hand_start(show_dealer, cards_and_values, score)
   show_dealer.gsub!('no', 'yes')
-  full_board_display(cards_and_values, show_dealer, score)
+  board_display(cards_and_values, show_dealer, score)
   prompt(MESSAGES['dealer_second_card_reveal'])
   gets.chomp
 end
@@ -259,7 +253,7 @@ def computer_hit_process(deck, cards_and_values, show_dealer, score)
   prompt(MESSAGES['dealer_below_stay'])
   gets.chomp
   deal_cards(deck, 1, cards_and_values, 'dealer')
-  full_board_display(cards_and_values, show_dealer, score)
+  board_display(cards_and_values, show_dealer, score)
 end
 
 def computer_under_stay?(dealer_cards_value)
@@ -361,10 +355,10 @@ def display_winner(msg, win_msg)
   puts
 end
 
-def play_again_full_logic
+def play_again
   response = nil
   loop do
-    response = play_again
+    response = play_again_response
     break if response.eql?('no')
     play_again_yes
     break
@@ -372,15 +366,19 @@ def play_again_full_logic
   response
 end
 
-def play_again
-  prompt(MESSAGES['play_another_game'])
-  response = gets.chomp.downcase
-  if response.eql?('n') || response.eql?('no')
-    return 'no'
-  elsif response.eql?('y') || response.eql?('yes')
-    return 'yes'
+def play_again_response
+  response = nil
+  loop do
+    prompt(MESSAGES['play_another_game'])
+    response = gets.chomp.downcase
+    if response.eql?('n') || response.eql?('no')
+      return 'no'
+    elsif response.eql?('y') || response.eql?('yes')
+      return 'yes'
+    end
+    break if ['y', 'yes', 'n', 'no'].include?(response)
+    prompt(MESSAGES['invalid_input'])
   end
-  prompt(MESSAGES['invalid_input'])
 end
 
 def play_again_yes
@@ -406,14 +404,14 @@ loop do
                        player_card_values: [], dealer_card_values: [] }
   deal_cards(deck, 2, cards_and_values, 'player')
   deal_cards(deck, 2, cards_and_values, 'dealer')
-  full_board_display(cards_and_values, show_dealer, score)
+  board_display(cards_and_values, show_dealer, score)
 
   max_hand_win = String.new
   check_max_hand_win = check_for_max_hand(cards_and_values, show_dealer,
                                           max_hand_win)
   if !check_max_hand_win.nil?
     show_dealer.gsub!('no', 'yes')
-    full_board_display(cards_and_values, show_dealer, score)
+    board_display(cards_and_values, show_dealer, score)
   else
     player_status = ''
     break_out = ''
@@ -421,42 +419,43 @@ loop do
     loop do
       prompt(MESSAGES['player_hit_or_stay'])
       response = gets.chomp
-      if response.eql?('hit')
+      if ['hit', 'h'].include?(response)
         deal_cards(deck, 1, cards_and_values, 'player')
-        full_board_display(cards_and_values, show_dealer, score)
+        board_display(cards_and_values, show_dealer, score)
       end
 
       player_status = player_hand_check(response, cards_and_values,
                                         show_dealer, break_out)
       break if player_status.eql?('bust') || break_out.eql?('true')
 
-      prompt(MESSAGES['invalid_input']) if response != 'hit'
+      prompt(MESSAGES['invalid_input']) if response != 'hit' || response != 'h'
     end
 
     if player_status.eql?('bust')
-      full_board_display(cards_and_values, show_dealer, score)
+      board_display(cards_and_values, show_dealer, score)
     else
       dealer_bust = ''
       computer_hand_start(show_dealer, cards_and_values, score)
 
       loop do
-        full_board_display(cards_and_values, show_dealer, score)
-        if computer_under_stay?(cards_and_values[:dealer_card_values])
+        board_display(cards_and_values, show_dealer, score)
+        while computer_under_stay?(cards_and_values[:dealer_card_values])
           computer_hit_process(deck, cards_and_values, show_dealer, score)
         end
 
         dealer_total = cards_and_values[:dealer_card_values].sum
         if dealer_total >= D_STAY && dealer_total < MAX_HAND
           computer_hit_check(cards_and_values)
-          break
+          break_loop = true
         elsif dealer_total.eql?(MAX_HAND)
           check_max_hand_win = computer_max_hand_check(cards_and_values,
                                                        show_dealer)
-          break
+          break_loop = true
         elsif bust?(cards_and_values[:dealer_card_values].sum)
           dealer_bust = true
-          break
+          break_loop = true
         end
+        break if break_loop.eql?(true)
       end
     end
   end
@@ -464,7 +463,6 @@ loop do
   player_sum = cards_and_values[:player_card_values].sum
   dealer_sum = cards_and_values[:dealer_card_values].sum
   msg = String.new
-  win_msg = nil
   winner = String.new
 
   puts
@@ -483,12 +481,12 @@ loop do
   score[:dealer] += 1 if winner.eql?('dealer')
 
   puts
-  full_board_display(cards_and_values, show_dealer, score)
+  board_display(cards_and_values, show_dealer, score)
   if score[:player] < GAME_ROUNDS && score[:dealer] < GAME_ROUNDS
     display_winner(msg, win_msg)
     prompt(MESSAGES['round_over'])
   else
-    winner.gsub!(/[a-z]/i, '')
+    winner = '' # .gsub!(/[a-z]/i, '')
     champion(score, winner)
     win_msg = winner_message(winner)
     display_winner(msg, win_msg)
@@ -497,10 +495,11 @@ loop do
   gets.chomp
 
   if score[:player].eql?(GAME_ROUNDS) || score[:dealer].eql?(GAME_ROUNDS)
-    response = play_again_full_logic
+    response = play_again
     break if response.eql?('no')
     reset_score(score)
   end
+  break if response.eql?('no')
 end
 
 system 'clear'
